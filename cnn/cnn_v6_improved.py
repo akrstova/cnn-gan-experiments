@@ -12,30 +12,34 @@ from keras.layers import LeakyReLU, Dropout
 from keras.layers import BatchNormalization
 import datetime
 
-dropout = 0.4
+dropout = 0.2
 classifier = Sequential()
 
-classifier.add(Conv2D(64, (3, 3), input_shape=(128, 128, 3)))
+classifier.add(Conv2D(64, (3, 3), input_shape=(256, 256, 3)))
+classifier.add(BatchNormalization())
 classifier.add(LeakyReLU(alpha=0.2))
 classifier.add(MaxPooling2D(pool_size=(2, 2)))
 classifier.add(Dropout(dropout))
 classifier.add(Conv2D(64, (3, 3)))
+classifier.add(BatchNormalization())
 classifier.add(LeakyReLU(alpha=0.2))
 classifier.add(MaxPooling2D(pool_size=(2, 2)))
 classifier.add(Dropout(dropout))
 classifier.add(Conv2D(64, (3, 3)))
+classifier.add(BatchNormalization())
 classifier.add(LeakyReLU(alpha=0.2))
 classifier.add(MaxPooling2D(pool_size=(2, 2)))
 classifier.add(Dropout(dropout))
 classifier.add(Conv2D(64, (3, 3)))
+classifier.add(BatchNormalization())
 classifier.add(LeakyReLU(alpha=0.2))
 classifier.add(MaxPooling2D(pool_size=(2, 2)))
 classifier.add(Dropout(dropout))
 
 classifier.add(Flatten())
-classifier.add(Dropout(0.5))
+classifier.add(Dropout(0.2))
 classifier.add(Dense(units=256, activation='relu'))
-classifier.add(Dropout(0.5))
+classifier.add(Dropout(0.2))
 classifier.add(Dense(units=10, activation='sigmoid'))
 
 classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
@@ -60,17 +64,17 @@ test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 training_set = train_datagen.flow_from_directory(
     'training_set/second_attempt',
-    target_size=(128, 128),
+    target_size=(256, 256),
     batch_size=32,
     class_mode='categorical')
 
 test_set = test_datagen.flow_from_directory(
     'test_set/second_attempt',
-    target_size=(128, 128),
+    target_size=(256, 256),
     batch_size=32,
     class_mode='categorical')
 
 start = datetime.datetime.now()
-classifier.fit_generator(training_set, steps_per_epoch=250, epochs=25, validation_data=test_set, validation_steps=65, callbacks=[tensorboard_cb])
+classifier.fit_generator(training_set, steps_per_epoch=250, epochs=25, validation_data=test_set, validation_steps=65)
 end = datetime.datetime.now()
 print("Finished in %s minutes" % (end.minute - start.minute))
