@@ -42,6 +42,9 @@ classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['
 
 # Image preprocessing
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import TensorBoard
+tensorboard_cb = TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True)
+
 
 train_datagen = ImageDataGenerator(
     rescale=1. / 255,
@@ -68,6 +71,6 @@ test_set = test_datagen.flow_from_directory(
     class_mode='categorical')
 
 start = datetime.datetime.now()
-classifier.fit_generator(training_set, steps_per_epoch=250, epochs=25, validation_data=test_set, validation_steps=65)
+classifier.fit_generator(training_set, steps_per_epoch=250, epochs=25, validation_data=test_set, validation_steps=65, callbacks=[tensorboard_cb])
 end = datetime.datetime.now()
 print("Finished in %s minutes" % (end.minute - start.minute))
