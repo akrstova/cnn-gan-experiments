@@ -3,7 +3,7 @@
 # More extensive data augmentation
 
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, MaxoutDense
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten, Activation
@@ -38,8 +38,10 @@ classifier.add(Dropout(dropout))
 
 classifier.add(Flatten())
 classifier.add(Dropout(0.2))
-classifier.add(Dense(units=256, activation='relu'))
-classifier.add(Dropout(0.2))
+classifier.add(MaxoutDense(2048))
+classifier.add(MaxoutDense(2048))
+# classifier.add(Dense(units=256, activation='relu'))
+# classifier.add(Dropout(0.2))
 classifier.add(Dense(units=10, activation='sigmoid'))
 
 classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
