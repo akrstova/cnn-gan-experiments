@@ -3,7 +3,7 @@
 # More extensive data augmentation
 
 from keras.models import Sequential
-from keras.layers import Dense, MaxoutDense
+from keras.layers import Dense, MaxoutDense, ZeroPadding2D
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten, Activation
@@ -12,45 +12,47 @@ from keras.layers import LeakyReLU, Dropout
 from keras.layers import BatchNormalization
 import datetime
 
+from keras.optimizers import SGD
+
 dropout = 0.2
 classifier = Sequential()
 
 classifier.add(Conv2D(64, (3, 3), input_shape=(256, 256, 3)))
-classifier.add(BatchNormalization())
 classifier.add(LeakyReLU(alpha=0.2))
-classifier.add(MaxPooling2D(pool_size=(2, 2)))
+classifier.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+classifier.add(ZeroPadding2D((1, 1)))
 classifier.add(Dropout(dropout))
-classifier.add(Conv2D(64, (3, 3)))
-classifier.add(BatchNormalization())
+classifier.add(Conv2D(128, (3, 3)))
 classifier.add(LeakyReLU(alpha=0.2))
-classifier.add(MaxPooling2D(pool_size=(2, 2)))
+classifier.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+classifier.add(ZeroPadding2D((1, 1)))
 classifier.add(Dropout(dropout))
-classifier.add(Conv2D(64, (3, 3)))
-classifier.add(BatchNormalization())
+classifier.add(Conv2D(256, (3, 3)))
 classifier.add(LeakyReLU(alpha=0.2))
-classifier.add(MaxPooling2D(pool_size=(2, 2)))
+classifier.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+classifier.add(ZeroPadding2D((1, 1)))
 classifier.add(Dropout(dropout))
-classifier.add(Conv2D(64, (3, 3)))
-classifier.add(BatchNormalization())
+classifier.add(Conv2D(512, (3, 3)))
 classifier.add(LeakyReLU(alpha=0.2))
-classifier.add(MaxPooling2D(pool_size=(2, 2)))
+classifier.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+classifier.add(ZeroPadding2D((1, 1)))
 classifier.add(Dropout(dropout))
 
 classifier.add(Flatten())
-classifier.add(Dropout(0.2))
-classifier.add(MaxoutDense(2048))
-classifier.add(MaxoutDense(2048))
-# classifier.add(Dense(units=256, activation='relu'))
-# classifier.add(Dropout(0.2))
-classifier.add(Dense(units=10, activation='sigmoid'))
+classifier.add(Dense(4096, activation='relu'))
+classifier.add(Dropout(0.5))
+classifier.add(Dense(4096, activation='relu'))
+classifier.add(Dropout(0.5))
+classifier.add(Dense(1000, activation='softmax'))
 
-classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+classifier.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Image preprocessing
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import TensorBoard
-tensorboard_cb = TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True)
 
+tensorboard_cb = TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True)
 
 train_datagen = ImageDataGenerator(
     rescale=1. / 255,
@@ -65,13 +67,13 @@ train_datagen = ImageDataGenerator(
 test_datagen = ImageDataGenerator(rescale=1. / 255)
 
 training_set = train_datagen.flow_from_directory(
-    'training_set/second_attempt',
+    '../../dataset/training_set/second_attempt',
     target_size=(256, 256),
     batch_size=32,
     class_mode='categorical')
 
 test_set = test_datagen.flow_from_directory(
-    'test_set/second_attempt',
+    '../../dataset/test_set/second_attempt',
     target_size=(256, 256),
     batch_size=32,
     class_mode='categorical')
