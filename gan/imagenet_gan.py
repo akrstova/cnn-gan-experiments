@@ -28,7 +28,7 @@ class GAN(object):
         depth = 64
         dropout = 0.4
         input_shape = (self.img_rows, self.img_columns, self.channel)
-        self.D.add(Conv2D(depth * 1, 5, strides=2, input_shape=input_shape,\
+        self.D.add(Conv2D(depth * 1, 5, strides=2, input_shape=input_shape, \
                           padding='same'))
         self.D.add(LeakyReLU(alpha=0.2))
         self.D.add(Dropout(dropout))
@@ -124,8 +124,7 @@ class ImageNetGAN(object):
         labels = []
 
         # First on two images as originals
-        all_img_paths = ["D:/ImageNet/dataset/training_set/second_attempt/apple/n07742012_3153.jpeg",
-                         "D:/ImageNet/dataset/training_set/second_attempt/apple/n07742012_3180.jpeg"]
+        all_img_paths = ["apple.jpg"]
         for img_path in all_img_paths:
             img = self.preprocess_img(io.imread(img_path))
             label = 1
@@ -171,13 +170,14 @@ class ImageNetGAN(object):
         if save_interval > 0:
             noise_input = np.random.uniform(-1.0, 1.0, size=[128, 128])
         for i in range(train_steps):
+            print("X shape ", self.x_train.shape)
             images_train = self.x_train[np.random.randint(0, self.x_train.shape[0], size=batch_size), :, :, :]
             noise = np.random.uniform(-1.0, 1.0, size=[batch_size, 128])
 
             images_fake = self.generator.predict(noise)
-
+            print("Shapes ", images_train.shape, images_fake.shape)
             x = np.concatenate((images_train, images_fake))
-            y = np.ones([2*batch_size, 1])
+            y = np.ones([2 * batch_size, 1])
             y[batch_size:, :] = 0
             d_loss = self.discriminator.train_on_batch(x, y)
 
@@ -187,10 +187,10 @@ class ImageNetGAN(object):
             log_mesg = "%d: [D loss: %f, acc: %f]" % (i, d_loss[0], d_loss[1])
             log_mesg = "%s  [A loss: %f, acc: %f]" % (log_mesg, a_loss[0], a_loss[1])
             print(log_mesg)
-            if save_interval>0:
-                if (i+1)%save_interval==0:
+            if save_interval > 0:
+                if (i + 1) % save_interval == 0:
                     self.plot_images(save_to_file=True, samples=noise_input.shape[0], \
-                             noise=noise_input, step=(i + 1))
+                                     noise=noise_input, step=(i + 1))
 
     # Helper function to display the generated images
     def plot_images(self, save_to_file=False, fake=True, samples=16, noise=None, step=0):
